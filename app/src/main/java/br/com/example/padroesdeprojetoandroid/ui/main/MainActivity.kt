@@ -11,37 +11,31 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainContract.MainView {
+
+    private lateinit var mainPresenter: MainPresenter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mainPresenter = MainPresenter(this)
+
         btPesquisar.setOnClickListener {
-            pesquisar()
+            mainPresenter.pesquisar(etCEP.text.toString())
         }
     }
 
-    private fun pesquisar(){
-        APIService.instance
-            ?.pesquisar(etCEP.text.toString())
-            ?.enqueue(object: Callback<Endereco> {
-                override fun onResponse(call: Call<Endereco>, response: Response<Endereco>) {
-                    if(response.isSuccessful) {
-                        val endereco = response.body()
-                        endereco?.let{
-                            tvLogradouro.text = endereco.logradouro
-                            tvBairro.text = endereco.bairro
-                            tvLocalidade.text = endereco.localidade
-                            tvUF.text = endereco.uf
-                        }
-                    } else{
-                        Toast.makeText(this@MainActivity, "Endereço não encontrato", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onFailure(call: Call<Endereco>, t: Throwable) {
-                    Toast.makeText(this@MainActivity, t.message.toString(), Toast.LENGTH_SHORT).show()
-                }
-            })
+    override fun mostrarEndereco(endereco: Endereco?) {
+        tvLogradouro.text = endereco?.logradouro
+        tvBairro.text = endereco?.bairro
+        tvLocalidade.text = endereco?.localidade
+        tvUF.text = endereco?.uf
     }
+
+    override fun mostrarErro(mensagem: String) {
+        Toast.makeText(this, mensagem, Toast.LENGTH_SHORT).show()
+    }
+
+
 }
